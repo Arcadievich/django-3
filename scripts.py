@@ -35,7 +35,7 @@ def create_commendation(kid_name, subject):
     try:
         schoolkid = Schoolkid.objects.get(full_name__contains=kid_name)
     except Schoolkid.DoesNotExist:
-        print(f'Ученики с именем "{kid_name}" не найдены.')
+        print(f'Ученики с именем "{kid_name}" не найдены')
         sys.exit(1)
     except Schoolkid.MultipleObjectsReturned:
         print(f'Найдено несколько учеников с именем "{kid_name}"')
@@ -49,10 +49,15 @@ def create_commendation(kid_name, subject):
 
     last_lesson = subject_lessons.order_by('-date').first()
     
-    Commendation.objects.create(
-        text = choice(compliments),
-        created = last_lesson.date,
-        schoolkid = schoolkid,
-        subject = last_lesson.subject,
-        teacher = last_lesson.teacher,
-    )
+    try:
+        Commendation.objects.create(
+            text = choice(compliments),
+            created = last_lesson.date,
+            schoolkid = schoolkid,
+            subject = last_lesson.subject,
+            teacher = last_lesson.teacher,
+        )
+    except AttributeError:
+        print(f'Уроки по предмету "{subject}" не найдены')
+        print('Проверьте правильность написания названия предмета')
+        sys.exit(1)
