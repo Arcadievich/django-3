@@ -7,6 +7,18 @@ from datacenter.models import Commendation
 from random import choice
 
 
+COMPLIMENTS = [
+    'Молодец!',
+    'Мы с тобой не зря поработали!',
+    'Замечательно!',
+    'Потрясающе!',
+    'Ты меня очень обрадовал!',
+    'Ты меня приятно удивил!',
+    'Великолепно!',
+    'Прекрасно!',
+]
+
+
 def fix_marks(schoolkid: Schoolkid):
     """Исправление оценок ученика."""
     schoolkid_bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__in=[2,3])
@@ -21,25 +33,14 @@ def remove_chastisements(schoolkid: Schoolkid):
 
 def create_commendation(kid_name, subject):
     """Создание похвалы от учителя."""
-    compliments = [
-        'Молодец!',
-        'Мы с тобой не зря поработали!',
-        'Замечательно!',
-        'Потрясающе!',
-        'Ты меня очень обрадовал!',
-        'Ты меня приятно удивил!',
-        'Великолепно!',
-        'Прекрасно!',
-    ]
-
     try:
         schoolkid = Schoolkid.objects.get(full_name__contains=kid_name)
     except Schoolkid.DoesNotExist:
         print(f'Ученики с именем "{kid_name}" не найдены')
-        sys.exit(1)
+        raise Schoolkid.DoesNotExist
     except Schoolkid.MultipleObjectsReturned:
         print(f'Найдено несколько учеников с именем "{kid_name}"')
-        sys.exit(1)
+        raise Schoolkid.MultipleObjectsReturned
 
     subject_lessons = Lesson.objects.filter(
         year_of_study = schoolkid.year_of_study,
@@ -48,16 +49,14 @@ def create_commendation(kid_name, subject):
     )
 
     last_lesson = subject_lessons.order_by('-date').first()
+
+    if not last_lesson:
+        print(f'\nУроки по предмету "{subject}" отсутствуют\n')
     
-    try:
-        Commendation.objects.create(
-            text = choice(compliments),
-            created = last_lesson.date,
-            schoolkid = schoolkid,
-            subject = last_lesson.subject,
-            teacher = last_lesson.teacher,
-        )
-    except AttributeError:
-        print(f'Уроки по предмету "{subject}" не найдены')
-        print('Проверьте правильность написания названия предмета')
-        sys.exit(1)
+    Commendation.objects.create(
+        text = choice(COMPLIMENTS),
+        created = last_lesson.date,
+        schoolkid = schoolkid,
+        subject = last_lesson.subject,
+        teacher = last_lesson.teacher,
+    )
