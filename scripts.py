@@ -19,28 +19,35 @@ COMPLIMENTS = [
 ]
 
 
-def fix_marks(schoolkid: Schoolkid):
+def get_schoolkid(kid_name):
+    try:
+        schoolkid = Schoolkid.objects.get(full_name__contains=kid_name)
+        return schoolkid
+    except Schoolkid.DoesNotExist:
+        print(f'\nУченики с именем "{kid_name}" не найдены\n')
+        raise Schoolkid.DoesNotExist
+    except Schoolkid.MultipleObjectsReturned:
+        print(f'\nНайдено несколько учеников с именем "{kid_name}"\n')
+        raise Schoolkid.MultipleObjectsReturned
+
+
+def fix_marks(kid_name):
     """Исправление оценок ученика."""
-    schoolkid_bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__in=[2,3])
+    kid = get_schoolkid(kid_name)
+    schoolkid_bad_marks = Mark.objects.filter(schoolkid=kid, points__in=[2,3])
     schoolkid_bad_marks.update(points=5)
 
 
-def remove_chastisements(schoolkid: Schoolkid):
+def remove_chastisements(kid_name):
     """Удаление замечаний ученика."""
-    chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
+    kid = get_schoolkid(kid_name)
+    chastisements = Chastisement.objects.filter(schoolkid=kid)
     chastisements.delete()
 
 
 def create_commendation(kid_name, subject):
     """Создание похвалы от учителя."""
-    try:
-        schoolkid = Schoolkid.objects.get(full_name__contains=kid_name)
-    except Schoolkid.DoesNotExist:
-        print(f'Ученики с именем "{kid_name}" не найдены')
-        raise Schoolkid.DoesNotExist
-    except Schoolkid.MultipleObjectsReturned:
-        print(f'Найдено несколько учеников с именем "{kid_name}"')
-        raise Schoolkid.MultipleObjectsReturned
+    schoolkid = get_schoolkid(kid_name)
 
     subject_lessons = Lesson.objects.filter(
         year_of_study = schoolkid.year_of_study,
@@ -52,6 +59,7 @@ def create_commendation(kid_name, subject):
 
     if not last_lesson:
         print(f'\nУроки по предмету "{subject}" отсутствуют\n')
+        return
     
     Commendation.objects.create(
         text = choice(COMPLIMENTS),
