@@ -34,33 +34,34 @@ python manage.py shell
 import scripts
 ```
 
-- "Возьми" себя или своего друга в переменную командой:
+## Функции и команды для их запуска:
+- `get_schoolkid` используется внутри других функций для поиска ученика в Базе Данных по "Фамилии Имени Отчеству"
 
 ```powershell
-kid = Schoolkid.objects.filter(full_name__contains='Фамилия Имя').first()
+scripts.get_schoolkid(kid_name)
 ```
 
-## Функции и команды для их запуска:
-
 - `fix_marks` исправит все двойки и тройки на пятерки
+    * Вместо `kid_name` впишите "Фамилию Имя Отчество", либо просто "Фамилию Имя"
 
 ```powershell
-scripts.fix_marks(kid)
+scripts.fix_marks(kid_name)
 ```
 
 - `remove_chastisements` удалить все замечания учителей из твоего дневника
+    * Вместо `kid_name` впишите "Фамилию Имя Отчество", либо просто "Фамилию Имя"
 
 ```powershell
-scripts.remove_chastisements(kid)
+scripts.remove_chastisements(kid_name)
 ```
 
 - `create_commendation` создаст похвалу в твоем дневнике
-    * Заместо `Фамилия Имя` впиши свою фамилию и имя
-    * Заместо `Название предмета` впиши Физкультра или Математика, или Технология, смотря за какой предмет ты хочешь получить похвалу
+    * Вместо `kid_name` впишите "Фамилию Имя Отчество", либо просто "Фамилию Имя"
+    * Вместо `subject` впишите название предмета, по которому нужно получить похвалу
     * Не забывай про заглавные буквы и не удаляй кавычки
 
 ```powershell
-scripts.create_commendation('Фамилия Имя', 'Название предмета')
+scripts.create_commendation(kid_name, subject)
 ```
 
 ## Цель проекта
